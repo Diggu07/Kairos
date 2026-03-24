@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  task-view.fxml — Tasks TableView screen.
+  Loaded dynamically into the DashboardController centre pane.
+-->
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.kairos.controller.TaskController"
+      spacing="16"
+      style="-fx-padding: 24; -fx-background-color: #1a1a2e;">
+
+    <!-- ── Header row ── -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="✓  Tasks" styleClass="section-title" HBox.hgrow="ALWAYS" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Button text="＋  Add Task" styleClass="btn-primary" onAction="#handleAddTask" />
+    </HBox>
+
+    <!-- ── Completion Progress ── -->
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Label text="Completion:" styleClass="section-subtitle" />
+        <ProgressBar fx:id="progressBar" prefWidth="220" prefHeight="10" progress="0" />
+        <Label fx:id="progressLabel" text="0 / 0 completed" styleClass="section-subtitle" />
+    </HBox>
+
+    <!-- ── Tasks TableView ── -->
+    <TableView fx:id="tasksTable"
+               VBox.vgrow="ALWAYS"
+               tableMenuButtonVisible="false"
+               style="-fx-background-color: #16213e;">
+
+        <columns>
+            <TableColumn fx:id="colTitle"    text="Title"    prefWidth="250" />
+            <TableColumn fx:id="colPriority" text="Priority" prefWidth="90"  />
+            <TableColumn fx:id="colStatus"   text="Status"   prefWidth="110" />
+            <TableColumn fx:id="colUpdated"  text="Updated"  prefWidth="180" />
+            <TableColumn fx:id="colActions"  text="Actions"  prefWidth="200" />
+        </columns>
+
+        <placeholder>
+            <Label text="No tasks yet. Click '＋ Add Task' to create one."
+                   styleClass="empty-state-label" />
+        </placeholder>
+
+    </TableView>
+
+</VBox>

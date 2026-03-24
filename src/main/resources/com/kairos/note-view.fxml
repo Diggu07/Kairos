@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  note-view.fxml — Notes TableView screen.
+  Loaded dynamically into the DashboardController centre pane.
+-->
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.kairos.controller.NoteController"
+      spacing="16"
+      style="-fx-padding: 24; -fx-background-color: #1a1a2e;">
+
+    <!-- ── Header row ── -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="📝  Notes" styleClass="section-title" HBox.hgrow="ALWAYS" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Button text="＋  Add Note" styleClass="btn-primary" onAction="#handleAddNote" />
+    </HBox>
+
+    <!-- ── Notes TableView ── -->
+    <TableView fx:id="notesTable"
+               VBox.vgrow="ALWAYS"
+               tableMenuButtonVisible="false"
+               style="-fx-background-color: #16213e;">
+
+        <columns>
+            <TableColumn fx:id="colTitle"   text="Title"        prefWidth="280" />
+            <TableColumn fx:id="colTags"    text="Tags"         prefWidth="160" />
+            <TableColumn fx:id="colPriority" text="Priority"    prefWidth="90"  />
+            <TableColumn fx:id="colCreated" text="Created"      prefWidth="180" />
+            <TableColumn fx:id="colActions" text="Actions"      prefWidth="150" />
+        </columns>
+
+        <placeholder>
+            <Label text="No notes yet. Click '＋ Add Note' to create one."
+                   styleClass="empty-state-label" />
+        </placeholder>
+
+    </TableView>
+
+</VBox>

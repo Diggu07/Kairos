@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  reminder-view.fxml — Reminders TableView screen.
+  Rows are colour-coded RED/YELLOW/GREEN by the controller.
+-->
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.kairos.controller.ReminderController"
+      spacing="16"
+      style="-fx-padding: 24; -fx-background-color: #1a1a2e;">
+
+    <!-- ── Header row ── -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="🔔  Reminders" styleClass="section-title" HBox.hgrow="ALWAYS" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Button text="＋  Add Reminder" styleClass="btn-primary" onAction="#handleAddReminder" />
+    </HBox>
+
+    <!-- ── Legend ── -->
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <Label text="🔴  Overdue" style="-fx-text-fill: #e94560; -fx-font-size: 11px;" />
+        <Label text="🟡  Today"   style="-fx-text-fill: #ff9800; -fx-font-size: 11px;" />
+        <Label text="🟢  Future"  style="-fx-text-fill: #4caf50; -fx-font-size: 11px;" />
+    </HBox>
+
+    <!-- ── Reminders TableView ── -->
+    <TableView fx:id="remindersTable"
+               VBox.vgrow="ALWAYS"
+               tableMenuButtonVisible="false"
+               style="-fx-background-color: #16213e;">
+
+        <columns>
+            <TableColumn fx:id="colTitle"        text="Title"         prefWidth="240" />
+            <TableColumn fx:id="colReminderTime" text="Reminder Time" prefWidth="200" />
+            <TableColumn fx:id="colPriority"     text="Priority"      prefWidth="90"  />
+            <TableColumn fx:id="colStatus"       text="Status"        prefWidth="110" />
+            <TableColumn fx:id="colActions"      text="Actions"       prefWidth="150" />
+        </columns>
+
+        <placeholder>
+            <Label text="No reminders yet. Click '＋ Add Reminder' to create one."
+                   styleClass="empty-state-label" />
+        </placeholder>
+
+    </TableView>
+
+</VBox>
