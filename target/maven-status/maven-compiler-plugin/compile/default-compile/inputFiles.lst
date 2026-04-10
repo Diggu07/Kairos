@@ -1,11 +1,13 @@
 D:\Kairos\src\main\java\com\kairos\controller\TaskController.java
-D:\Kairos\src\main\java\com\kairos\service\EncryptionService.java
 D:\Kairos\src\main\java\com\kairos\util\DateUtil.java
 D:\Kairos\src\main\java\com\kairos\controller\DashboardController.java
+D:\Kairos\src\main\java\com\kairos\main\MainApp.java
+D:\Kairos\src\main\java\com\kairos\service\ReminderService.java
+D:\Kairos\src\main\java\com\kairos\service\EncryptionService.java
 D:\Kairos\src\main\java\com\kairos\controller\ReminderController.java
 D:\Kairos\src\main\java\com\kairos\dao\DatabaseManager.java
+D:\Kairos\src\main\java\com\kairos\service\AudioService.java
 D:\Kairos\src\main\java\com\kairos\controller\NoteController.java
 D:\Kairos\src\main\java\com\kairos\dao\EntryDAO.java
 D:\Kairos\src\main\java\com\kairos\controller\AddEditEntryDialog.java
-D:\Kairos\src\main\java\com\kairos\main\MainApp.java
 D:\Kairos\src\main\java\com\kairos\model\Entry.java

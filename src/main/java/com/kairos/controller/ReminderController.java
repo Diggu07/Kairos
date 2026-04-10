@@ -116,13 +116,22 @@ public class ReminderController implements Initializable {
 
         // Action buttons
         colActions.setCellFactory(col -> new TableCell<>() {
+            private final Button doneBtn   = new Button("Done");
             private final Button editBtn   = new Button("Edit");
             private final Button deleteBtn = new Button("Delete");
-            private final HBox   box       = new HBox(6, editBtn, deleteBtn);
+            private final HBox   box       = new HBox(6, doneBtn, editBtn, deleteBtn);
 
             {
+                doneBtn  .getStyleClass().add("btn-complete");
                 editBtn  .getStyleClass().add("btn-edit");
                 deleteBtn.getStyleClass().add("btn-delete");
+
+                doneBtn.setOnAction(e -> {
+                    Entry entry = getTableView().getItems().get(getIndex());
+                    entryDAO.markAsCompleted(entry.getId());
+                    loadReminders();
+                    if (dashboardController != null) dashboardController.refreshDashboard();
+                });
 
                 editBtn.setOnAction(e -> {
                     Entry entry = getTableView().getItems().get(getIndex());
@@ -138,7 +147,13 @@ public class ReminderController implements Initializable {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty ? null : box);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    Entry entry = getTableView().getItems().get(getIndex());
+                    doneBtn.setDisable(entry.isCompleted());
+                    setGraphic(box);
+                }
             }
         });
     }

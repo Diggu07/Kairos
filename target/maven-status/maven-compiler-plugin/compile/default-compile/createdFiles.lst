@@ -13,7 +13,9 @@ com\kairos\controller\NoteController$2.class
 com\kairos\controller\TaskController$4.class
 com\kairos\controller\DashboardController$1.class
 com\kairos\service\EncryptionService.class
+com\kairos\service\AudioService.class
 com\kairos\controller\NoteController$1.class
+com\kairos\service\ReminderService.class
 com\kairos\controller\TaskController$2.class
 com\kairos\controller\ReminderController$1.class
 com\kairos\model\Entry.class

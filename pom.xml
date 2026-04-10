@@ -136,6 +136,7 @@
                     <include>**/*.properties</include>
                     <include>**/*.png</include>
                     <include>**/*.jpg</include>
+                    <include>**/*.wav</include>
                 </includes>
             </resource>
         </resources>

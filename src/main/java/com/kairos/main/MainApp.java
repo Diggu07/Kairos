@@ -53,6 +53,9 @@ public class MainApp extends Application {
         // Initialise database eagerly so first-run table creation happens before UI
         DatabaseManager.getInstance();
 
+        // Start background scheduling (Notifications/Audio)
+        com.kairos.service.ReminderService.start();
+
         // Load the root layout from FXML
         FXMLLoader loader = new FXMLLoader(
                 Objects.requireNonNull(
@@ -81,6 +84,7 @@ public class MainApp extends Application {
 
         // Close DB connection gracefully when the window is closed
         primaryStage.setOnCloseRequest(event -> {
+            com.kairos.service.ReminderService.stop();
             DatabaseManager.getInstance().closeConnection();
             System.out.println("[MainApp] Application closed.");
         });
