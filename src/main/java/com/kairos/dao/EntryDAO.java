@@ -29,12 +29,14 @@ public class EntryDAO {
 
     private static final String INSERT_SQL =
             "INSERT INTO entries (title, content, type, priority, tags, " +
-            "created_at, updated_at, reminder_time, is_completed, encrypted_content) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "created_at, updated_at, reminder_time, is_completed, encrypted_content, " +
+            "notified_at, notification_count, last_snoozed_at) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_SQL =
             "UPDATE entries SET title=?, content=?, type=?, priority=?, tags=?, " +
-            "updated_at=?, reminder_time=?, is_completed=?, encrypted_content=? " +
+            "updated_at=?, reminder_time=?, is_completed=?, encrypted_content=?, " +
+            "notified_at=?, notification_count=?, last_snoozed_at=? " +
             "WHERE id=?";
 
     private static final String DELETE_SQL =
@@ -109,6 +111,9 @@ public class EntryDAO {
                     ? DateUtil.formatForDB(entry.getReminderTime()) : null);
             ps.setInt   (9, entry.isCompleted() ? 1 : 0);
             ps.setString(10, encrypted);
+            ps.setString(11, entry.getNotifiedAt() != null ? DateUtil.formatForDB(entry.getNotifiedAt()) : null);
+            ps.setInt   (12, entry.getNotificationCount());
+            ps.setString(13, entry.getLastSnoozedAt() != null ? DateUtil.formatForDB(entry.getLastSnoozedAt()) : null);
 
             ps.executeUpdate();
 
@@ -149,7 +154,10 @@ public class EntryDAO {
                     ? DateUtil.formatForDB(entry.getReminderTime()) : null);
             ps.setInt   (8, entry.isCompleted() ? 1 : 0);
             ps.setString(9, encrypted);
-            ps.setInt   (10, entry.getId());
+            ps.setString(10, entry.getNotifiedAt() != null ? DateUtil.formatForDB(entry.getNotifiedAt()) : null);
+            ps.setInt   (11, entry.getNotificationCount());
+            ps.setString(12, entry.getLastSnoozedAt() != null ? DateUtil.formatForDB(entry.getLastSnoozedAt()) : null);
+            ps.setInt   (13, entry.getId());
 
             return ps.executeUpdate() > 0;
 
@@ -342,6 +350,20 @@ public class EntryDAO {
         String reminderStr = rs.getString("reminder_time");
         if (reminderStr != null && !reminderStr.isEmpty()) {
             entry.setReminderTime(DateUtil.parseFromDB(reminderStr));
+        }
+
+        try {
+            String notifiedStr = rs.getString("notified_at");
+            if (notifiedStr != null && !notifiedStr.isEmpty()) {
+                entry.setNotifiedAt(DateUtil.parseFromDB(notifiedStr));
+            }
+            entry.setNotificationCount(rs.getInt("notification_count"));
+            String snoozedStr = rs.getString("last_snoozed_at");
+            if (snoozedStr != null && !snoozedStr.isEmpty()) {
+                entry.setLastSnoozedAt(DateUtil.parseFromDB(snoozedStr));
+            }
+        } catch (Exception ignored) {
+            // Columns might not exist if migration hasn't run yet in some edge cases
         }
 
         // Decrypt stored content; fall back to raw content column on failure

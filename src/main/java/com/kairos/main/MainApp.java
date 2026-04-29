@@ -1,6 +1,7 @@
 package com.kairos.main;
 
 import com.kairos.dao.DatabaseManager;
+import com.kairos.service.ReminderScheduler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -53,8 +54,8 @@ public class MainApp extends Application {
         // Initialise database eagerly so first-run table creation happens before UI
         DatabaseManager.getInstance();
 
-        // Start background scheduling (Notifications/Audio)
-        com.kairos.service.ReminderService.start();
+        // Start background services
+        ReminderScheduler.getInstance().startScheduling();
 
         // Load the root layout from FXML
         FXMLLoader loader = new FXMLLoader(
@@ -84,7 +85,8 @@ public class MainApp extends Application {
 
         // Close DB connection gracefully when the window is closed
         primaryStage.setOnCloseRequest(event -> {
-            com.kairos.service.ReminderService.stop();
+           // Stop background services
+        ReminderScheduler.getInstance().stopScheduling();
             DatabaseManager.getInstance().closeConnection();
             System.out.println("[MainApp] Application closed.");
         });

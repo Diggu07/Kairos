@@ -49,7 +49,10 @@ public class DatabaseManager {
             "  updated_at        TEXT     NOT NULL," +
             "  reminder_time     TEXT," +
             "  is_completed      INTEGER  NOT NULL DEFAULT 0," +
-            "  encrypted_content TEXT" +
+            "  encrypted_content TEXT," +
+            "  notified_at       TEXT," +
+            "  notification_count INTEGER  DEFAULT 0," +
+            "  last_snoozed_at   TEXT" +
             ");";
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -76,6 +79,7 @@ public class DatabaseManager {
             String dbPath = initAppDirectory();
             openConnection(dbPath);
             createTable();
+            migrateSchema();
         } catch (SQLException e) {
             System.err.println("[DatabaseManager] Failed to initialise database: " + e.getMessage());
             throw new RuntimeException("Cannot initialise Kairos database.", e);
@@ -188,6 +192,29 @@ public class DatabaseManager {
         try (Statement st = connection.createStatement()) {
             st.execute(CREATE_TABLE_SQL);
             System.out.println("[DatabaseManager] Table 'entries' ready.");
+        }
+    }
+
+    /**
+     * Migrates the database schema by adding columns if they don't already exist.
+     */
+    private void migrateSchema() {
+        try (Statement st = connection.createStatement()) {
+            try { 
+                st.execute("ALTER TABLE entries ADD COLUMN notified_at TEXT;"); 
+            } catch (SQLException ignored) { /* Column might already exist */ }
+            
+            try { 
+                st.execute("ALTER TABLE entries ADD COLUMN notification_count INTEGER DEFAULT 0;"); 
+            } catch (SQLException ignored) { /* Column might already exist */ }
+            
+            try { 
+                st.execute("ALTER TABLE entries ADD COLUMN last_snoozed_at TEXT;"); 
+            } catch (SQLException ignored) { /* Column might already exist */ }
+            
+            System.out.println("[DatabaseManager] Schema migration complete.");
+        } catch (SQLException e) {
+            System.err.println("[DatabaseManager] Schema migration failed: " + e.getMessage());
         }
     }
 }

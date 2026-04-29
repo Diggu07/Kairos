@@ -46,6 +46,7 @@ public class DashboardController implements Initializable {
     @FXML private Button btnNotes;
     @FXML private Button btnTasks;
     @FXML private Button btnReminders;
+    @FXML private Button btnSettings;
 
     /* Top bar */
     @FXML private TextField  searchField;
@@ -60,6 +61,7 @@ public class DashboardController implements Initializable {
     @FXML private Label      countCompleted;
     @FXML private VBox       recentEntriesBox;
     @FXML private Label      emptyStateLabel;
+    @FXML private TextField  smartEntryField;
 
     // ─────────────────────────────────────────────────────────────────────────
     // State
@@ -239,6 +241,13 @@ public class DashboardController implements Initializable {
             card.getChildren().addAll(header, priorityLabel, meta);
         }
 
+        // ── Click to open detail view ──
+        card.setCursor(javafx.scene.Cursor.HAND);
+        card.setOnMouseClicked(e -> {
+            EntryDetailDialog detailDialog = new EntryDetailDialog(entry, this);
+            detailDialog.showAndWait();
+        });
+
         return card;
     }
 
@@ -275,14 +284,175 @@ public class DashboardController implements Initializable {
         loadView("/com/kairos/reminder-view.fxml");
     }
 
-    /** Placeholder for a future settings screen. */
+    /** Opens Settings & Insights panel with analytics, procrastination, and notification tests. */
     @FXML
     private void handleNavSettings() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Settings");
-        alert.setHeaderText("Settings");
-        alert.setContentText("Settings panel coming in a future release.");
-        alert.showAndWait();
+        setActiveNav(btnSettings);
+
+        VBox settingsPanel = new VBox(20);
+        settingsPanel.setStyle("-fx-padding: 24;");
+
+        // ── Title ──
+        Label title = new Label("⚙  Settings & Insights");
+        title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: -color-text-primary;");
+
+        // ══════════════════════════════════════════════════
+        // SECTION 1: Analytics Overview
+        // ══════════════════════════════════════════════════
+        com.kairos.service.AnalyticsService analytics = com.kairos.service.AnalyticsService.getInstance();
+
+        Label analyticsTitle = new Label("📊  Analytics Overview");
+        analyticsTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-text-primary;");
+
+        double completionRate = analytics.getTaskCompletionRate(
+                java.time.LocalDate.now().minusDays(30), java.time.LocalDate.now());
+        int streak = analytics.getCurrentStreak();
+        int habitScore = analytics.getHabitScore();
+        java.time.LocalTime productiveHour = analytics.getMostProductiveHour();
+        java.time.DayOfWeek productiveDay = analytics.getMostProductiveDay();
+
+        HBox analyticsCards = new HBox(12);
+        analyticsCards.getChildren().addAll(
+            buildInfoCard("Completion Rate", String.format("%.0f%%", completionRate * 100), "#10B981"),
+            buildInfoCard("Current Streak", streak + " days", "#F59E0B"),
+            buildInfoCard("Habit Score", habitScore + "/100", "#3B82F6"),
+            buildInfoCard("Best Hour", productiveHour.toString(), "#8B5CF6"),
+            buildInfoCard("Best Day", productiveDay.toString(), "#EC4899")
+        );
+
+        // ══════════════════════════════════════════════════
+        // SECTION 2: Procrastination Analysis
+        // ══════════════════════════════════════════════════
+        com.kairos.service.ProcrastinationDetector detector = new com.kairos.service.ProcrastinationDetector();
+
+        Label procTitle = new Label("🔍  Procrastination Analysis");
+        procTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-text-primary;");
+
+        var stalledTasks = detector.identifyProcrastinatedTasks();
+        var level = detector.getProcrastinationLevel();
+
+        String levelColor = switch (level) {
+            case HIGH -> "#EF4444";
+            case MODERATE -> "#F59E0B";
+            case LOW -> "#10B981";
+        };
+
+        Label levelLabel = new Label("Level: " + level.name());
+        levelLabel.setStyle("-fx-text-fill: " + levelColor + "; -fx-font-weight: bold; -fx-font-size: 14px;");
+
+        Label stalledLabel = new Label("Stalled items: " + stalledTasks.size());
+        stalledLabel.setStyle("-fx-text-fill: -color-text-secondary; -fx-font-size: 13px;");
+
+        Label actionLabel = new Label("💡 " + detector.suggestImmediateAction());
+        actionLabel.setWrapText(true);
+        actionLabel.setStyle("-fx-text-fill: -color-text-primary; -fx-font-size: 13px; -fx-padding: 8; " +
+                "-fx-background-color: -color-surface; -fx-background-radius: 8; -fx-border-color: -color-border-custom; -fx-border-radius: 8;");
+
+        VBox procBox = new VBox(8, levelLabel, stalledLabel, actionLabel);
+        procBox.setStyle("-fx-padding: 12; -fx-background-color: -color-surface; -fx-background-radius: 10; " +
+                "-fx-border-color: -color-border-custom; -fx-border-radius: 10;");
+
+        // ══════════════════════════════════════════════════
+        // SECTION 3: Motivation
+        // ══════════════════════════════════════════════════
+        com.kairos.service.MotivationService motivation = com.kairos.service.MotivationService.getInstance();
+        var prompt = motivation.generateMotivationalPrompt();
+
+        Label motTitle = new Label("🌟  Motivation");
+        motTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-text-primary;");
+
+        Label quoteLabel = new Label("\"" + prompt.title + "\"");
+        quoteLabel.setStyle("-fx-font-size: 15px; -fx-font-style: italic; -fx-text-fill: -color-primary;");
+
+        Label quoteMsg = new Label(prompt.message);
+        quoteMsg.setWrapText(true);
+        quoteMsg.setStyle("-fx-text-fill: -color-text-secondary; -fx-font-size: 13px;");
+
+        Label motScoreLabel = new Label("Motivation Score: " + motivation.getMotivationScore() + "/100");
+        motScoreLabel.setStyle("-fx-text-fill: -color-text-primary; -fx-font-weight: bold;");
+
+        VBox motBox = new VBox(8, quoteLabel, quoteMsg, motScoreLabel);
+        motBox.setStyle("-fx-padding: 12; -fx-background-color: -color-surface; -fx-background-radius: 10; " +
+                "-fx-border-color: -color-border-custom; -fx-border-radius: 10;");
+
+        // ══════════════════════════════════════════════════
+        // SECTION 4: Test Buttons
+        // ══════════════════════════════════════════════════
+        Label testTitle = new Label("🧪  Test Features");
+        testTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-text-primary;");
+
+        Button testToast = new Button("🔔 Test Toast Notification");
+        testToast.getStyleClass().add("btn-primary");
+        testToast.setOnAction(e -> {
+            com.kairos.service.AlertManager.getInstance().triggerAlert(
+                com.kairos.service.AlertManager.AlertType.MILESTONE_REACHED, null);
+        });
+
+        Button testWarning = new Button("⚠ Test Warning Alert");
+        testWarning.getStyleClass().add("btn-edit");
+        testWarning.setOnAction(e -> {
+            com.kairos.service.AlertManager.getInstance().triggerAlert(
+                com.kairos.service.AlertManager.AlertType.TASK_OVERDUE, null);
+        });
+
+        Button testMotivation = new Button("💪 Test Motivation Prompt");
+        testMotivation.getStyleClass().add("btn-complete");
+        testMotivation.setOnAction(e -> {
+            com.kairos.service.AlertManager.getInstance().triggerAlert(
+                com.kairos.service.AlertManager.AlertType.MOTIVATION_PROMPT, null);
+        });
+
+        Button testBackup = new Button("💾 Create Backup");
+        testBackup.getStyleClass().add("btn-secondary");
+        testBackup.setOnAction(e -> {
+            com.kairos.service.BackupService backupService = new com.kairos.service.BackupService();
+            String path = backupService.createBackup(
+                System.getProperty("user.home") + "/kairos/kairos.db");
+            if (path != null) {
+                com.kairos.components.CustomNotificationWindow.showNotification(
+                    "Backup Created", "Saved to: " + path,
+                    com.kairos.components.CustomNotificationWindow.NotificationType.SUCCESS);
+            } else {
+                com.kairos.components.CustomNotificationWindow.showNotification(
+                    "Backup Failed", "Could not create backup.",
+                    com.kairos.components.CustomNotificationWindow.NotificationType.ERROR);
+            }
+        });
+
+        HBox testButtons = new HBox(10, testToast, testWarning, testMotivation, testBackup);
+
+        // ── Assemble ──
+        settingsPanel.getChildren().addAll(
+            title,
+            new Separator(),
+            analyticsTitle, analyticsCards,
+            new Separator(),
+            procTitle, procBox,
+            new Separator(),
+            motTitle, motBox,
+            new Separator(),
+            testTitle, testButtons
+        );
+
+        mainScrollPane.setContent(settingsPanel);
+    }
+
+    /** Helper to build a small stat card for the settings panel. */
+    private VBox buildInfoCard(String label, String value, String color) {
+        VBox card = new VBox(4);
+        card.setStyle("-fx-padding: 14; -fx-background-color: -color-surface; -fx-background-radius: 10; " +
+                "-fx-border-color: -color-border-custom; -fx-border-radius: 10; -fx-min-width: 120;");
+        card.getStyleClass().add("summary-card");
+
+        Label valLabel = new Label(value);
+        valLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + color + ";");
+
+        Label nameLabel = new Label(label);
+        nameLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: -color-text-secondary;");
+
+        card.getChildren().addAll(valLabel, nameLabel);
+        HBox.setHgrow(card, Priority.ALWAYS);
+        return card;
     }
 
     /**
@@ -333,6 +503,43 @@ public class DashboardController implements Initializable {
         dialog.showAndWait().ifPresent(entry -> {
             int newId = entryDAO.insertEntry(entry);
             if (newId > 0) {
+                refreshDashboard();
+            } else {
+                showErrorAlert("Save Failed", "Could not save the entry.", "Check the logs for details.");
+            }
+        });
+    }
+
+    /** Detects intent from the smart text field and opens pre-filled dialog. */
+    @FXML
+    private void handleSmartEntry() {
+        String text = smartEntryField.getText();
+        if (text == null || text.isBlank()) {
+            showErrorAlert("Empty Input", "Please enter some text.", "You must type something before detecting intent.");
+            return;
+        }
+
+        com.kairos.model.DetectedIntent intent = com.kairos.service.IntentDetectionService.getInstance().detectIntent(text);
+
+        Entry prefilled = new Entry();
+        prefilled.setTitle(intent.getExtractedTitle() != null ? intent.getExtractedTitle() : "New Entry");
+        prefilled.setContent(intent.getExtractedContent() != null ? intent.getExtractedContent() : text);
+        prefilled.setType(intent.getSuggestedType() != null ? intent.getSuggestedType() : EntryType.NOTE);
+        prefilled.setPriority(intent.getSuggestedPriority() != null ? intent.getSuggestedPriority() : com.kairos.model.Entry.Priority.MEDIUM);
+        
+        if (intent.getSuggestedReminderTime() != null) {
+            prefilled.setReminderTime(intent.getSuggestedReminderTime());
+        }
+        
+        if (intent.getExtractedTags() != null && !intent.getExtractedTags().isEmpty()) {
+            prefilled.setTags(String.join(", ", intent.getExtractedTags()));
+        }
+
+        AddEditEntryDialog dialog = new AddEditEntryDialog(prefilled);
+        dialog.showAndWait().ifPresent(entry -> {
+            int newId = entryDAO.insertEntry(entry);
+            if (newId > 0) {
+                smartEntryField.clear();
                 refreshDashboard();
             } else {
                 showErrorAlert("Save Failed", "Could not save the entry.", "Check the logs for details.");

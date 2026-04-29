@@ -74,6 +74,15 @@ public class Entry {
      */
     private String encryptedContent;
 
+    /** Timestamp of when the user was notified of this reminder. */
+    private LocalDateTime notifiedAt;
+
+    /** Number of times the user has been notified. */
+    private int notificationCount;
+
+    /** Timestamp of the last time this reminder was snoozed. */
+    private LocalDateTime lastSnoozedAt;
+
     // ─────────────────────────────────────────────────────────────────────────
     // Constructors
     // ─────────────────────────────────────────────────────────────────────────
@@ -93,11 +102,15 @@ public class Entry {
      * @param reminderTime     optional reminder fire time (nullable)
      * @param isCompleted      completion status
      * @param encryptedContent AES-encrypted content string
+     * @param notifiedAt       Timestamp of when the user was notified
+     * @param notificationCount Number of times notified
+     * @param lastSnoozedAt    Timestamp of last snooze
      */
     public Entry(int id, String title, String content, EntryType type,
                  Priority priority, String tags, LocalDateTime createdAt,
                  LocalDateTime updatedAt, LocalDateTime reminderTime,
-                 boolean isCompleted, String encryptedContent) {
+                 boolean isCompleted, String encryptedContent,
+                 LocalDateTime notifiedAt, int notificationCount, LocalDateTime lastSnoozedAt) {
         this.id               = id;
         this.title            = title;
         this.content          = content;
@@ -109,6 +122,21 @@ public class Entry {
         this.reminderTime     = reminderTime;
         this.isCompleted      = isCompleted;
         this.encryptedContent = encryptedContent;
+        this.notifiedAt       = notifiedAt;
+        this.notificationCount = notificationCount;
+        this.lastSnoozedAt    = lastSnoozedAt;
+    }
+
+    /**
+     * Legacy constructor used when loading an existing entry from the database
+     * without notification fields.
+     */
+    public Entry(int id, String title, String content, EntryType type,
+                 Priority priority, String tags, LocalDateTime createdAt,
+                 LocalDateTime updatedAt, LocalDateTime reminderTime,
+                 boolean isCompleted, String encryptedContent) {
+        this(id, title, content, type, priority, tags, createdAt, updatedAt, 
+             reminderTime, isCompleted, encryptedContent, null, 0, null);
     }
 
     /**
@@ -142,6 +170,7 @@ public class Entry {
         this.isCompleted = false;
         this.priority    = Priority.MEDIUM;
         this.type        = EntryType.NOTE;
+        this.notificationCount = 0;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -169,6 +198,9 @@ public class Entry {
         copy.setCompleted(this.isCompleted);
         copy.setCreatedAt(this.createdAt);
         copy.setUpdatedAt(LocalDateTime.now());
+        copy.setNotifiedAt(this.notifiedAt);
+        copy.setNotificationCount(this.notificationCount);
+        copy.setLastSnoozedAt(this.lastSnoozedAt);
         return copy;
     }
 
@@ -208,6 +240,15 @@ public class Entry {
 
     public String getEncryptedContent() { return encryptedContent; }
     public void setEncryptedContent(String encryptedContent) { this.encryptedContent = encryptedContent; }
+
+    public LocalDateTime getNotifiedAt() { return notifiedAt; }
+    public void setNotifiedAt(LocalDateTime notifiedAt) { this.notifiedAt = notifiedAt; }
+
+    public int getNotificationCount() { return notificationCount; }
+    public void setNotificationCount(int notificationCount) { this.notificationCount = notificationCount; }
+
+    public LocalDateTime getLastSnoozedAt() { return lastSnoozedAt; }
+    public void setLastSnoozedAt(LocalDateTime lastSnoozedAt) { this.lastSnoozedAt = lastSnoozedAt; }
 
     // ─────────────────────────────────────────────────────────────────────────
     // toString

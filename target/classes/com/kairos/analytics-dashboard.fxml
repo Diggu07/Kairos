@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: -color-background;" stylesheets="@styles.css"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.kairos.controller.AnalyticsDashboardController">
+    <VBox spacing="20" style="-fx-padding: 24;">
+        
+        <Label text="Analytics &amp; Insights" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: -color-text-primary;"/>
+        
+        <!-- Key Metrics Cards -->
+        <HBox spacing="20">
+            <VBox styleClass="summary-card" HBox.hgrow="ALWAYS">
+                <Label text="Completion Rate" styleClass="card-label"/>
+                <Label fx:id="completionRateLabel" styleClass="card-number" style="-fx-text-fill: -color-success;"/>
+            </VBox>
+            <VBox styleClass="summary-card" HBox.hgrow="ALWAYS">
+                <Label text="Current Streak" styleClass="card-label"/>
+                <Label fx:id="currentStreakLabel" styleClass="card-number" style="-fx-text-fill: -color-warning;"/>
+            </VBox>
+            <VBox styleClass="summary-card" HBox.hgrow="ALWAYS">
+                <Label text="Habit Score" styleClass="card-label"/>
+                <Label fx:id="habitScoreLabel" styleClass="card-number" style="-fx-text-fill: -color-primary;"/>
+            </VBox>
+        </HBox>
+
+        <!-- Charts Row -->
+        <HBox spacing="20" prefHeight="300">
+            <VBox styleClass="summary-card" HBox.hgrow="ALWAYS" prefWidth="400">
+                <Label text="Task Completion Trend" styleClass="card-label"/>
+                <LineChart fx:id="trendChart" legendVisible="false">
+                    <xAxis><CategoryAxis label="Day"/></xAxis>
+                    <yAxis><NumberAxis label="Completed"/></yAxis>
+                </LineChart>
+            </VBox>
+            <VBox styleClass="summary-card" HBox.hgrow="ALWAYS" prefWidth="300">
+                <Label text="Entry Distribution" styleClass="card-label"/>
+                <PieChart fx:id="distributionChart" legendVisible="false"/>
+            </VBox>
+        </HBox>
+
+        <!-- Insights -->
+        <VBox styleClass="summary-card">
+            <Label text="Smart Insights" styleClass="card-label" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+            <Separator style="-fx-padding: 10 0;"/>
+            <VBox fx:id="insightsBox" spacing="10"/>
+        </VBox>
+
+    </VBox>
+</ScrollPane>

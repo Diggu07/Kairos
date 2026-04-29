@@ -102,6 +102,12 @@
                 <!-- Section: Summary Cards -->
                 <Label text="Overview" styleClass="section-title" />
 
+                <!-- Smart NLP Entry -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="smartEntryField" promptText="Type a task, note, or reminder... (e.g., 'Remind me to call John tomorrow at 5pm')" HBox.hgrow="ALWAYS" prefHeight="40" styleClass="text-field" />
+                    <Button text="✨ Detect Intent" styleClass="btn-primary" onAction="#handleSmartEntry" prefHeight="40" />
+                </HBox>
+
                 <HBox spacing="16">
 
                     <VBox styleClass="summary-card,card-notes" HBox.hgrow="ALWAYS" spacing="4">

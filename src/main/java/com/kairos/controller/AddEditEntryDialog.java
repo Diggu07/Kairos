@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import com.kairos.model.DetectedIntent;
+import com.kairos.service.IntentDetectionService;
+
 /**
  * Reusable dialog for creating or editing a Kairos {@link Entry}.
  *
@@ -49,6 +52,9 @@ public class AddEditEntryDialog extends Dialog<Entry> {
 
     /** Row that contains the reminder date/time pickers. Only visible for REMINDER type. */
     private HBox reminderRow;
+
+    private final Button detectIntentBtn = new Button("Detect Intent \u2728");
+    private final Label intentStatusLabel = new Label();
 
     // ─────────────────────────────────────────────────────────────────────────
     // Constructor
@@ -120,13 +126,20 @@ public class AddEditEntryDialog extends Dialog<Entry> {
         if (existing != null) titleField.setText(existing.getTitle());
 
         // ── Content ──
-        contentArea.setPromptText("Entry content…");
+        contentArea.setPromptText("Entry content… Type freely, then click 'Detect Intent'");
         contentArea.setPrefRowCount(5);
         contentArea.setWrapText(true);
         contentArea.getStyleClass().add("text-area");
         if (existing != null && existing.getContent() != null) {
             contentArea.setText(existing.getContent());
         }
+
+        // ── Intent Detection ──
+        detectIntentBtn.getStyleClass().add("btn-secondary");
+        detectIntentBtn.setOnAction(e -> applyIntentDetection());
+        intentStatusLabel.setStyle("-fx-text-fill: #10B981; -fx-font-size: 11px;"); // Success color
+        HBox intentRow = new HBox(10, detectIntentBtn, intentStatusLabel);
+        intentRow.setStyle("-fx-alignment: CENTER_LEFT;");
 
         // ── Type ──
         typeBox.getItems().addAll(EntryType.values());
@@ -182,7 +195,7 @@ public class AddEditEntryDialog extends Dialog<Entry> {
         grid.getColumnConstraints().addAll(labelCol, fieldCol);
 
         addFormRow(grid, 0, "Title:",    titleField);
-        addFormRow(grid, 1, "Content:",  contentArea);
+        addFormRow(grid, 1, "Content:",  new VBox(8, contentArea, intentRow));
         addFormRow(grid, 2, "Type:",     typeBox);
         addFormRow(grid, 3, "Priority:", priorityBox);
         addFormRow(grid, 4, "Tags:",     tagsField);
@@ -247,5 +260,41 @@ public class AddEditEntryDialog extends Dialog<Entry> {
         }
 
         return entry;
+    }
+
+    private void applyIntentDetection() {
+        String text = contentArea.getText();
+        if (text == null || text.trim().isEmpty()) {
+            intentStatusLabel.setText("Please enter some text first.");
+            intentStatusLabel.setStyle("-fx-text-fill: #EF4444;");
+            return;
+        }
+
+        DetectedIntent intent = IntentDetectionService.getInstance().detectIntent(text);
+        
+        // Auto-fill form fields
+        typeBox.setValue(intent.getSuggestedType());
+        priorityBox.setValue(intent.getSuggestedPriority());
+        
+        if (titleField.getText().trim().isEmpty() && intent.getExtractedTitle() != null) {
+            titleField.setText(intent.getExtractedTitle());
+        }
+        
+        if (!intent.getExtractedTags().isEmpty()) {
+            String currentTags = tagsField.getText();
+            String newTags = String.join(", ", intent.getExtractedTags());
+            tagsField.setText(currentTags.isEmpty() ? newTags : currentTags + ", " + newTags);
+        }
+        
+        if (intent.getSuggestedReminderTime() != null) {
+            reminderDatePicker.setValue(intent.getSuggestedReminderTime().toLocalDate());
+            reminderHourSpinner.getValueFactory().setValue(intent.getSuggestedReminderTime().getHour());
+            reminderMinuteSpinner.getValueFactory().setValue(intent.getSuggestedReminderTime().getMinute());
+        }
+
+        intentStatusLabel.setText(String.format("Intent detected! Confidence: %s", intent.getConfidencePercentage()));
+        intentStatusLabel.setStyle("-fx-text-fill: #10B981;"); // green
+        
+        updateReminderVisibility();
     }
 }
